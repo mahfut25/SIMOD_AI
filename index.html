@@ -1,0 +1,3154 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SIMOD AI - Generator Rencana Pembelajaran Mendalam</title>
+
+    <!-- =========================================================
+         TAILWIND CSS
+    ========================================================== -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- =========================================================
+         VUE 3
+    ========================================================== -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- =========================================================
+         LUCIDE ICON
+    ========================================================== -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        /* =====================================================
+           PRINT
+        ====================================================== */
+
+        @media print {
+
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+                font-family: 'Times New Roman', Times, serif;
+                font-size: 11pt;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+
+            th,
+            td {
+                border: 1px solid #000 !important;
+                padding: 6px 8px !important;
+                font-size: 10pt !important;
+            }
+
+            #document-paper {
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .print-container {
+                padding: 0 !important;
+                background: white !important;
+            }
+        }
+
+    </style>
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+<div id="app" class="flex flex-col min-h-screen">
+
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
+
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 no-print">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-auto min-h-16 py-2 flex flex-wrap items-center justify-between gap-2">
+
+            <!-- LOGO -->
+
+            <div class="flex items-center space-x-3">
+
+                <div class="bg-indigo-600 text-white p-2 rounded-lg font-bold flex items-center justify-center shadow-lg">
+
+                    <i data-lucide="book-open-check" class="w-6 h-6"></i>
+
+                </div>
+
+                <div>
+
+                    <h1 class="text-lg font-bold leading-tight">
+
+                        SIMOD
+
+                        <span class="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-full font-normal">
+
+                            AI
+
+                        </span>
+
+                    </h1>
+
+                    <p class="text-xs text-slate-400">
+
+                        Generator Rencana Pembelajaran Mendalam
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUTTONS -->
+
+            <div class="flex flex-wrap items-center gap-2">
+
+                <!-- TES AI -->
+
+                <button
+                    @click="testAIConnection"
+                    :disabled="aiLoading"
+                    class="px-3 py-1.5 text-xs font-semibold bg-violet-600 hover:bg-violet-700 disabled:bg-violet-300 text-white rounded-lg transition flex items-center shadow-sm"
+                >
+
+                    <i data-lucide="bot" class="w-4 h-4 mr-1"></i>
+
+                    {{ aiLoading ? 'Menghubungkan...' : 'Tes AI' }}
+
+                </button>
+
+
+                <!-- GENERATE AI -->
+
+                <button
+                    @click="generateRPMWithAI"
+                    :disabled="aiLoading"
+                    class="px-3 py-1.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white rounded-lg transition flex items-center shadow-sm"
+                >
+
+                    <i data-lucide="sparkles" class="w-4 h-4 mr-1"></i>
+
+                    {{ aiLoading ? 'AI Memproses...' : 'Generate RPM dengan AI' }}
+
+                </button>
+
+
+                <!-- CONTOH -->
+
+                <button
+                    @click="loadSampleData"
+                    class="px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition flex items-center shadow-sm"
+                >
+
+                    <i data-lucide="file-text" class="w-4 h-4 mr-1"></i>
+
+                    Muat Contoh
+
+                </button>
+
+
+                <!-- BARU -->
+
+                <button
+                    @click="resetForm"
+                    class="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition border border-slate-700"
+                >
+
+                    <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1 inline"></i>
+
+                    Baru
+
+                </button>
+
+
+                <!-- WORD -->
+
+                <button
+                    @click="exportToWord"
+                    class="px-3 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center shadow-sm"
+                >
+
+                    <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+
+                    Ekspor Word
+
+                </button>
+
+
+                <!-- PRINT -->
+
+                <button
+                    @click="printDocument"
+                    class="px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition flex items-center shadow-sm"
+                >
+
+                    <i data-lucide="printer" class="w-4 h-4 mr-1"></i>
+
+                    Cetak / PDF
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         AI STATUS
+    ========================================================== -->
+
+    <div
+        v-if="aiMessage"
+        class="no-print max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4"
+    >
+
+        <div
+            :class="[
+                'rounded-xl px-4 py-3 text-xs flex items-center justify-between shadow-sm border',
+                aiMessageType === 'success'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    : aiMessageType === 'error'
+                    ? 'bg-red-50 text-red-800 border-red-200'
+                    : 'bg-blue-50 text-blue-800 border-blue-200'
+            ]"
+        >
+
+            <div class="flex items-center">
+
+                <i
+                    :data-lucide="
+                        aiMessageType === 'success'
+                            ? 'check-circle'
+                            : aiMessageType === 'error'
+                            ? 'alert-circle'
+                            : 'info'
+                    "
+                    class="w-4 h-4 mr-2"
+                ></i>
+
+                <span>{{ aiMessage }}</span>
+
+            </div>
+
+            <button
+                @click="aiMessage = ''"
+                class="ml-4 opacity-60 hover:opacity-100"
+            >
+
+                ×
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         MAIN
+    ========================================================== -->
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6">
+
+
+        <!-- =====================================================
+             LEFT PANEL
+        ====================================================== -->
+
+        <div class="w-full lg:w-1/2 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden no-print">
+
+
+            <!-- TABS -->
+
+            <div class="flex border-b border-slate-200 bg-slate-50 overflow-x-auto">
+
+                <button
+                    v-for="(tab,index) in tabs"
+                    :key="index"
+                    @click="activeTab=index"
+                    :class="[
+                        'px-4 py-3 text-xs font-semibold flex items-center space-x-1.5 whitespace-nowrap border-b-2 transition-colors',
+                        activeTab === index
+                        ? 'border-indigo-600 text-indigo-600 bg-white'
+                        : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                    ]"
+                >
+
+                    <span
+                        class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]"
+                        :class="{
+                            'bg-indigo-100 text-indigo-700 font-bold':
+                            activeTab === index
+                        }"
+                    >
+
+                        {{ index + 1 }}
+
+                    </span>
+
+                    <span>{{ tab.name }}</span>
+
+                </button>
+
+            </div>
+
+
+            <!-- FORM -->
+
+            <div class="p-6 flex-1 overflow-y-auto max-h-[calc(100vh-180px)]">
+
+
+                <!-- =================================================
+                     TAB 1
+                ================================================== -->
+
+                <div v-show="activeTab === 0" class="space-y-6">
+
+                    <div class="border-b pb-3">
+
+                        <h2 class="text-base font-bold text-slate-800 flex items-center">
+
+                            <i data-lucide="info" class="w-5 h-5 mr-2 text-indigo-600"></i>
+
+                            1. Identitas Dokumen
+
+                        </h2>
+
+                        <p class="text-xs text-slate-500">
+
+                            Informasi dasar satuan pendidikan dan mata pelajaran.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Mata Pelajaran
+
+                            </label>
+
+                            <input
+                                v-model="doc.identitas.mapel"
+                                type="text"
+                                placeholder="Contoh: Matematika"
+                                class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Kelas / Fase
+
+                            </label>
+
+                            <input
+                                v-model="doc.identitas.kelas"
+                                type="text"
+                                placeholder="Contoh: X / Fase E"
+                                class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Jurusan / Konsentrasi Keahlian
+
+                            </label>
+
+                            <input
+                                v-model="doc.identitas.jurusan"
+                                type="text"
+                                placeholder="Contoh: Agribisnis Tanaman"
+                                class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Semester
+
+                            </label>
+
+                            <input
+                                v-model="doc.identitas.semester"
+                                type="text"
+                                placeholder="Ganjil / Genap"
+                                class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+
+                        </div>
+
+
+                        <div class="sm:col-span-2">
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Jumlah Pertemuan / Alokasi Waktu
+
+                            </label>
+
+                            <input
+                                v-model="doc.identitas.jumlahPertemuan"
+                                type="text"
+                                placeholder="Contoh: 4 Pertemuan (8 JP)"
+                                class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Nama Guru Mata Pelajaran
+
+                            </label>
+
+                            <input
+                                v-model="doc.identitas.namaGuru"
+                                type="text"
+                                placeholder="Nama Guru"
+                                class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                NIP Guru
+
+                            </label>
+
+                            <input
+                                v-model="doc.identitas.nipGuru"
+                                type="text"
+                                placeholder="NIP"
+                                class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Supervisor / Kurikulum
+
+                            </label>
+
+                            <input
+                                v-model="doc.identitas.supervisor"
+                                type="text"
+                                placeholder="Nama Supervisor"
+                                class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Kepala Sekolah
+
+                            </label>
+
+                            <input
+                                v-model="doc.identitas.kepalaSekolah"
+                                type="text"
+                                placeholder="Nama Kepala Sekolah"
+                                class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- IDENTIFIKASI -->
+
+                    <div class="border-b pb-3 border-t pt-4">
+
+                        <h2 class="text-base font-bold text-slate-800 flex items-center">
+
+                            <i data-lucide="target" class="w-5 h-5 mr-2 text-indigo-600"></i>
+
+                            2. Identifikasi Pembelajaran
+
+                        </h2>
+
+                        <p class="text-xs text-slate-500">
+
+                            Karakteristik murid, materi, dan dimensi profil lulusan.
+
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <label class="block text-xs font-semibold text-slate-700 mb-2">
+
+                            Dimensi Profil Lulusan yang Disasar
+
+                        </label>
+
+                        <div class="grid grid-cols-2 gap-2">
+
+                            <label
+                                v-for="dimensi in opsiDimensi"
+                                :key="dimensi"
+                                class="flex items-center space-x-2 text-xs p-2 border rounded-lg cursor-pointer hover:bg-slate-50"
+                            >
+
+                                <input
+                                    type="checkbox"
+                                    :value="dimensi"
+                                    v-model="doc.identifikasi.dimensiProfil"
+                                    class="rounded text-indigo-600"
+                                >
+
+                                <span>{{ dimensi }}</span>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                            Identifikasi Kesiapan Murid
+
+                        </label>
+
+                        <textarea
+                            v-model="doc.identifikasi.kesiapanMurid"
+                            rows="4"
+                            placeholder="Jelaskan kondisi awal, pengetahuan prasyarat, karakteristik murid..."
+                            class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                        ></textarea>
+
+                    </div>
+
+
+                    <div>
+
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                            Karakteristik Mata Pelajaran / Materi
+
+                        </label>
+
+                        <textarea
+                            v-model="doc.identifikasi.karakteristikMateri"
+                            rows="4"
+                            placeholder="Jelaskan karakter materi dan keterkaitannya dengan kehidupan nyata atau dunia kerja..."
+                            class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- AI -->
+
+                    <div class="bg-gradient-to-r from-violet-50 to-indigo-50 border border-indigo-200 rounded-xl p-4">
+
+                        <div class="flex items-center mb-2">
+
+                            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600 mr-2"></i>
+
+                            <strong class="text-xs text-indigo-900">
+
+                                AI Assistant
+
+                            </strong>
+
+                        </div>
+
+                        <p class="text-[11px] text-slate-600 mb-3">
+
+                            Setelah data dasar diisi, AI dapat membantu menyempurnakan identifikasi pembelajaran.
+
+                        </p>
+
+                        <button
+                            @click="generateRPMWithAI"
+                            class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg"
+                        >
+
+                            ✨ Bantu Susun dengan AI
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     TAB 2
+                ================================================== -->
+
+                <div v-show="activeTab === 1" class="space-y-6">
+
+                    <div class="border-b pb-3">
+
+                        <h2 class="text-base font-bold text-slate-800 flex items-center">
+
+                            <i data-lucide="compass" class="w-5 h-5 mr-2 text-indigo-600"></i>
+
+                            3. Desain Pembelajaran
+
+                        </h2>
+
+                        <p class="text-xs text-slate-500">
+
+                            Tujuan, KKTP, praktik pedagogis dan kerangka Pembelajaran Mendalam.
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- TP -->
+
+                    <div>
+
+                        <div class="flex justify-between items-center mb-1">
+
+                            <label class="text-xs font-semibold text-slate-700">
+
+                                Tujuan Pembelajaran (TP)
+
+                            </label>
+
+                            <button
+                                @click="askAIForTP"
+                                class="text-xs text-indigo-600 font-semibold hover:underline"
+                            >
+
+                                ✨ Bantu AI
+
+                            </button>
+
+                        </div>
+
+                        <textarea
+                            v-model="doc.desain.tujuanPembelajaran"
+                            rows="4"
+                            placeholder="Murid dapat..."
+                            class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- KKTP -->
+
+                    <div>
+
+                        <div class="flex justify-between items-center mb-2">
+
+                            <label class="text-xs font-semibold text-slate-700">
+
+                                Kriteria Ketercapaian Tujuan Pembelajaran (KKTP)
+
+                            </label>
+
+                            <button
+                                @click="addKKTP"
+                                class="text-xs text-indigo-600 font-semibold hover:underline"
+                            >
+
+                                + Tambah KKTP
+
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            v-for="(kktp,idx) in doc.desain.kktpList"
+                            :key="idx"
+                            class="flex items-center space-x-2 mb-2"
+                        >
+
+                            <span class="text-xs font-bold text-slate-400 w-5">
+
+                                {{ idx + 1 }}.
+
+                            </span>
+
+                            <input
+                                v-model="doc.desain.kktpList[idx]"
+                                type="text"
+                                placeholder="Tuliskan kriteria ketercapaian..."
+                                class="flex-1 text-xs p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+
+                            <button
+                                @click="removeKKTP(idx)"
+                                class="text-slate-400 hover:text-red-500"
+                            >
+
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PM -->
+
+                    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-4">
+
+                        <h3 class="text-xs font-bold text-indigo-900 uppercase">
+
+                            Kerangka Pembelajaran Mendalam
+
+                        </h3>
+
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Praktik Pedagogis
+
+                            </label>
+
+                            <input
+                                v-model="doc.desain.praktikPedagogis"
+                                type="text"
+                                placeholder="PBL, PjBL, diskusi kelompok, inquiry..."
+                                class="w-full text-xs p-2.5 border rounded-lg bg-white"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Kemitraan Pembelajaran
+
+                            </label>
+
+                            <input
+                                v-model="doc.desain.kemitraanPembelajaran"
+                                type="text"
+                                placeholder="Orang tua, industri, UMKM, praktisi..."
+                                class="w-full text-xs p-2.5 border rounded-lg bg-white"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-2">
+
+                                Lingkungan Pembelajaran
+
+                            </label>
+
+                            <div class="space-y-2">
+
+                                <input
+                                    v-model="doc.desain.lingkunganFisik"
+                                    type="text"
+                                    placeholder="Ruang fisik"
+                                    class="w-full text-xs p-2 border rounded-lg bg-white"
+                                >
+
+                                <input
+                                    v-model="doc.desain.lingkunganVirtual"
+                                    type="text"
+                                    placeholder="Ruang virtual"
+                                    class="w-full text-xs p-2 border rounded-lg bg-white"
+                                >
+
+                                <input
+                                    v-model="doc.desain.budayaBelajar"
+                                    type="text"
+                                    placeholder="Budaya belajar"
+                                    class="w-full text-xs p-2 border rounded-lg bg-white"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+
+                                Pemanfaatan Digital
+
+                            </label>
+
+                            <input
+                                v-model="doc.desain.pemanfaatanDigital"
+                                type="text"
+                                placeholder="LKPD Digital, GeoGebra, Quizizz, video..."
+                                class="w-full text-xs p-2.5 border rounded-lg bg-white"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- GENERATE -->
+
+                    <div class="bg-gradient-to-r from-amber-50 to-indigo-50 p-4 rounded-xl border border-amber-200">
+
+                        <div class="flex items-center mb-2">
+
+                            <i data-lucide="wand-2" class="w-5 h-5 text-amber-600 mr-2"></i>
+
+                            <span class="text-xs font-bold">
+
+                                Generate Perangkat Pembelajaran
+
+                            </span>
+
+                        </div>
+
+                        <p class="text-[11px] text-slate-600 mb-3">
+
+                            AI akan membaca identitas, materi, TP, KKTP dan konteks pembelajaran kemudian menyusun rancangan RPM.
+
+                        </p>
+
+                        <button
+                            @click="generateRPMWithAI"
+                            :disabled="aiLoading"
+                            class="w-full py-3 bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 disabled:opacity-50 text-white font-bold text-xs rounded-lg"
+                        >
+
+                            ✨
+
+                            {{ aiLoading ? 'AI Sedang Menyusun...' : 'Generate RPM dengan AI' }}
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     TAB 3
+                ================================================== -->
+
+                <div v-show="activeTab === 2" class="space-y-6">
+
+                    <div class="border-b pb-3 flex justify-between items-end">
+
+                        <div>
+
+                            <h2 class="text-base font-bold text-slate-800 flex items-center">
+
+                                <i data-lucide="layers" class="w-5 h-5 mr-2 text-indigo-600"></i>
+
+                                4. Pengalaman Belajar
+
+                            </h2>
+
+                            <p class="text-xs text-slate-500">
+
+                                Memahami – Mengaplikasi – Merefleksi.
+
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            @click="addPertemuan"
+                            class="px-3 py-1.5 text-xs font-semibold bg-indigo-600 text-white rounded-lg"
+                        >
+
+                            + Pertemuan
+
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        v-for="(p,pIdx) in doc.pengalamanBelajar"
+                        :key="pIdx"
+                        class="border border-slate-200 rounded-xl p-4 bg-slate-50 space-y-3"
+                    >
+
+                        <div class="flex justify-between items-center border-b pb-2">
+
+                            <span class="font-bold text-xs text-indigo-800 bg-indigo-100 px-2.5 py-1 rounded-md">
+
+                                Pertemuan {{ pIdx + 1 }}
+
+                            </span>
+
+                            <button
+                                v-if="doc.pengalamanBelajar.length > 1"
+                                @click="removePertemuan(pIdx)"
+                                class="text-red-500 text-xs"
+                            >
+
+                                Hapus
+
+                            </button>
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">
+
+                                Fokus KKTP
+
+                            </label>
+
+                            <input
+                                v-model="p.kktpRef"
+                                type="text"
+                                class="w-full text-xs p-2 border rounded-lg bg-white"
+                            >
+
+                        </div>
+
+
+                        <div class="bg-white p-3 rounded-lg border">
+
+                            <label class="block text-xs font-bold text-amber-700 mb-1">
+
+                                KEGIATAN AWAL
+
+                            </label>
+
+                            <textarea
+                                v-model="p.awal"
+                                rows="4"
+                                class="w-full text-xs p-2 border rounded"
+                                placeholder="Salam, doa, apersepsi, pertanyaan pemantik..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="bg-white p-3 rounded-lg border border-blue-100">
+
+                            <label class="block text-xs font-bold text-blue-700 mb-1">
+
+                                INTI: MEMAHAMI
+
+                            </label>
+
+                            <textarea
+                                v-model="p.memahami"
+                                rows="4"
+                                class="w-full text-xs p-2 border rounded"
+                                placeholder="Eksplorasi konsep, orientasi masalah..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="bg-white p-3 rounded-lg border border-emerald-100">
+
+                            <label class="block text-xs font-bold text-emerald-700 mb-1">
+
+                                INTI: MENGAPLIKASI
+
+                            </label>
+
+                            <textarea
+                                v-model="p.mengaplikasi"
+                                rows="4"
+                                class="w-full text-xs p-2 border rounded"
+                                placeholder="LKPD, praktik, proyek, diskusi..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="bg-white p-3 rounded-lg border border-purple-100">
+
+                            <label class="block text-xs font-bold text-purple-700 mb-1">
+
+                                INTI: MEREFLEKSI
+
+                            </label>
+
+                            <textarea
+                                v-model="p.merefleksi"
+                                rows="4"
+                                class="w-full text-xs p-2 border rounded"
+                                placeholder="Presentasi, refleksi, peer review..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="bg-white p-3 rounded-lg border">
+
+                            <label class="block text-xs font-bold text-slate-700 mb-1">
+
+                                KEGIATAN PENUTUP
+
+                            </label>
+
+                            <textarea
+                                v-model="p.penutup"
+                                rows="3"
+                                class="w-full text-xs p-2 border rounded"
+                                placeholder="Kesimpulan, refleksi, tindak lanjut..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <button
+                            @click="improveMeetingWithAI(pIdx)"
+                            class="w-full py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-bold"
+                        >
+
+                            ✨ Perbaiki Pertemuan {{ pIdx + 1 }} dengan AI
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     TAB 4
+                ================================================== -->
+
+                <div v-show="activeTab === 3" class="space-y-6">
+
+                    <div class="border-b pb-3">
+
+                        <h2 class="text-base font-bold text-slate-800 flex items-center">
+
+                            <i data-lucide="clipboard-check" class="w-5 h-5 mr-2 text-indigo-600"></i>
+
+                            5. Asesmen & Lampiran
+
+                        </h2>
+
+                    </div>
+
+
+                    <div>
+
+                        <label class="block text-xs font-semibold mb-1">
+
+                            Asesmen Awal / Diagnostik
+
+                        </label>
+
+                        <textarea
+                            v-model="doc.asesmen.asLearning"
+                            rows="4"
+                            class="w-full text-xs p-2.5 border rounded-lg"
+                            placeholder="Asesmen diagnostik..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div>
+
+                        <label class="block text-xs font-semibold mb-1">
+
+                            Asesmen Formatif / Proses
+
+                        </label>
+
+                        <textarea
+                            v-model="doc.asesmen.forLearning"
+                            rows="4"
+                            class="w-full text-xs p-2.5 border rounded-lg"
+                            placeholder="Observasi, LKPD, diskusi..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div>
+
+                        <label class="block text-xs font-semibold mb-1">
+
+                            Asesmen Sumatif / Akhir
+
+                        </label>
+
+                        <textarea
+                            v-model="doc.asesmen.ofLearning"
+                            rows="4"
+                            class="w-full text-xs p-2.5 border rounded-lg"
+                            placeholder="Post-test, proyek, produk..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="border-t pt-4">
+
+                        <div class="flex justify-between items-center mb-3">
+
+                            <h3 class="text-xs font-bold uppercase">
+
+                                Lampiran
+
+                            </h3>
+
+                            <button
+                                @click="addLampiran"
+                                class="text-xs text-indigo-600 font-semibold"
+                            >
+
+                                + Tambah Lampiran
+
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            v-for="(lamp,lIdx) in doc.lampiranList"
+                            :key="lIdx"
+                            class="mb-4 border rounded-lg p-3 bg-slate-50"
+                        >
+
+                            <div class="flex mb-2">
+
+                                <input
+                                    v-model="lamp.title"
+                                    type="text"
+                                    class="flex-1 text-xs font-bold p-2 border rounded bg-white"
+                                >
+
+                                <button
+                                    @click="removeLampiran(lIdx)"
+                                    class="ml-2 text-red-500"
+                                >
+
+                                    Hapus
+
+                                </button>
+
+                            </div>
+
+
+                            <textarea
+                                v-model="lamp.content"
+                                rows="6"
+                                class="w-full text-xs p-2 border rounded bg-white font-mono"
+                                placeholder="Isi lampiran..."
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        @click="generateRPMWithAI"
+                        class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs"
+                    >
+
+                        ✨ Lengkapi Perangkat dengan AI
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             RIGHT PANEL
+        ====================================================== -->
+
+        <div class="w-full lg:w-1/2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+
+
+            <div class="bg-slate-800 text-white px-4 py-3 flex justify-between items-center no-print">
+
+                <div class="flex items-center space-x-2">
+
+                    <i data-lucide="eye" class="w-4 h-4 text-indigo-400"></i>
+
+                    <span class="text-xs font-semibold">
+
+                        Pratinjau Dokumen
+
+                    </span>
+
+                </div>
+
+                <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded">
+
+                    RPM
+
+                </span>
+
+            </div>
+
+
+            <div class="print-container p-6 md:p-8 overflow-y-auto max-h-[calc(100vh-180px)] bg-slate-200 flex-1 flex justify-center">
+
+
+                <div
+                    id="document-paper"
+                    class="bg-white w-full max-w-[210mm] min-h-[297mm] p-8 md:p-10 shadow-lg text-slate-900 text-xs font-serif leading-relaxed border border-slate-300"
+                >
+
+                    <!-- TITLE -->
+
+                    <div class="text-center mb-6 pb-2 border-b-2 border-slate-900">
+
+                        <h2 class="text-base font-bold uppercase tracking-wide">
+
+                            RENCANA PEMBELAJARAN MENDALAM (RPM)
+
+                        </h2>
+
+                        <p class="text-xs italic">
+
+                            Pendekatan Pembelajaran Mendalam
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- IDENTITAS -->
+
+                    <table class="w-full border-collapse border border-slate-900 mb-6 text-xs">
+
+                        <tbody>
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Mata Pelajaran
+
+                                </td>
+
+                                <td class="border border-slate-900 p-2">
+
+                                    {{ doc.identitas.mapel || '..............' }}
+
+                                </td>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Kelas / Fase
+
+                                </td>
+
+                                <td class="border border-slate-900 p-2">
+
+                                    {{ doc.identitas.kelas || '..............' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Jurusan
+
+                                </td>
+
+                                <td class="border border-slate-900 p-2">
+
+                                    {{ doc.identitas.jurusan || '-' }}
+
+                                </td>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Semester
+
+                                </td>
+
+                                <td class="border border-slate-900 p-2">
+
+                                    {{ doc.identitas.semester || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Alokasi Waktu
+
+                                </td>
+
+                                <td class="border border-slate-900 p-2" colspan="3">
+
+                                    {{ doc.identitas.jumlahPertemuan || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- IDENTIFIKASI -->
+
+                            <tr class="bg-slate-100">
+
+                                <td colspan="4" class="border border-slate-900 p-2 font-bold text-center">
+
+                                    1. IDENTIFIKASI PEMBELAJARAN
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Dimensi Profil Lulusan
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2">
+
+                                    <div
+                                        v-for="d in opsiDimensi"
+                                        :key="d"
+                                    >
+
+                                        {{ doc.identifikasi.dimensiProfil.includes(d) ? '[✓]' : '[ ]' }}
+
+                                        {{ d }}
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Kesiapan Murid
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                    {{ doc.identifikasi.kesiapanMurid || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Karakteristik Materi
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                    {{ doc.identifikasi.karakteristikMateri || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- DESAIN -->
+
+                            <tr class="bg-slate-100">
+
+                                <td colspan="4" class="border border-slate-900 p-2 font-bold text-center">
+
+                                    2. DESAIN PEMBELAJARAN
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Tujuan Pembelajaran
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                    {{ doc.desain.tujuanPembelajaran || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    KKTP
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2">
+
+                                    <ol class="list-decimal pl-5">
+
+                                        <li
+                                            v-for="(k,idx) in doc.desain.kktpList"
+                                            :key="idx"
+                                        >
+
+                                            {{ k }}
+
+                                        </li>
+
+                                    </ol>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Praktik Pedagogis
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2">
+
+                                    {{ doc.desain.praktikPedagogis || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Kemitraan
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2">
+
+                                    {{ doc.desain.kemitraanPembelajaran || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Lingkungan
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2">
+
+                                    <strong>Fisik:</strong>
+                                    {{ doc.desain.lingkunganFisik || '-' }}
+
+                                    <br>
+
+                                    <strong>Virtual:</strong>
+                                    {{ doc.desain.lingkunganVirtual || '-' }}
+
+                                    <br>
+
+                                    <strong>Budaya:</strong>
+                                    {{ doc.desain.budayaBelajar || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Digital
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2">
+
+                                    {{ doc.desain.pemanfaatanDigital || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- PENGALAMAN -->
+
+                            <tr class="bg-slate-100">
+
+                                <td colspan="4" class="border border-slate-900 p-2 font-bold text-center">
+
+                                    3. PENGALAMAN BELAJAR
+
+                                </td>
+
+                            </tr>
+
+
+                            <template
+                                v-for="(p,pIdx) in doc.pengalamanBelajar"
+                                :key="'p'+pIdx"
+                            >
+
+                                <tr>
+
+                                    <td colspan="4" class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                        PERTEMUAN {{ pIdx + 1 }}
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td class="border border-slate-900 p-2 font-bold">
+
+                                        Fokus KKTP
+
+                                    </td>
+
+                                    <td colspan="3" class="border border-slate-900 p-2">
+
+                                        {{ p.kktpRef || '-' }}
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td class="border border-slate-900 p-2 font-bold">
+
+                                        Kegiatan Awal
+
+                                    </td>
+
+                                    <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                        {{ p.awal || '-' }}
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td class="border border-slate-900 p-2 font-bold">
+
+                                        Memahami
+
+                                    </td>
+
+                                    <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                        {{ p.memahami || '-' }}
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td class="border border-slate-900 p-2 font-bold">
+
+                                        Mengaplikasi
+
+                                    </td>
+
+                                    <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                        {{ p.mengaplikasi || '-' }}
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td class="border border-slate-900 p-2 font-bold">
+
+                                        Merefleksi
+
+                                    </td>
+
+                                    <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                        {{ p.merefleksi || '-' }}
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td class="border border-slate-900 p-2 font-bold">
+
+                                        Penutup
+
+                                    </td>
+
+                                    <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                        {{ p.penutup || '-' }}
+
+                                    </td>
+
+                                </tr>
+
+                            </template>
+
+
+                            <!-- ASESMEN -->
+
+                            <tr class="bg-slate-100">
+
+                                <td colspan="4" class="border border-slate-900 p-2 font-bold text-center">
+
+                                    4. ASESMEN PEMBELAJARAN
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Asesmen Awal
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                    {{ doc.asesmen.asLearning || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Asesmen Formatif
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                    {{ doc.asesmen.forLearning || '-' }}
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td class="border border-slate-900 p-2 font-bold bg-slate-50">
+
+                                    Asesmen Sumatif
+
+                                </td>
+
+                                <td colspan="3" class="border border-slate-900 p-2 whitespace-pre-line">
+
+                                    {{ doc.asesmen.ofLearning || '-' }}
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+
+                    <!-- SIGNATURE -->
+
+                    <div class="mt-8 flex justify-between text-xs">
+
+                        <div class="text-center w-1/3">
+
+                            <p>Mengetahui,</p>
+
+                            <p class="font-bold">
+
+                                Supervisor / Kurikulum
+
+                            </p>
+
+                            <div class="h-16"></div>
+
+                            <p class="font-bold underline">
+
+                                {{ doc.identitas.supervisor || '(................................)' }}
+
+                            </p>
+
+                        </div>
+
+
+                        <div class="text-center w-1/3">
+
+                            <p>Mengesahkan,</p>
+
+                            <p class="font-bold">
+
+                                Kepala Sekolah
+
+                            </p>
+
+                            <div class="h-16"></div>
+
+                            <p class="font-bold underline">
+
+                                {{ doc.identitas.kepalaSekolah || '(................................)' }}
+
+                            </p>
+
+                        </div>
+
+
+                        <div class="text-center w-1/3">
+
+                            <p>
+
+                                {{ doc.identitas.kota || 'Jember' }},
+
+                                {{ doc.identitas.tanggal || '........................' }}
+
+                            </p>
+
+                            <p class="font-bold">
+
+                                Guru Mata Pelajaran
+
+                            </p>
+
+                            <div class="h-16"></div>
+
+                            <p class="font-bold underline">
+
+                                {{ doc.identitas.namaGuru || '(................................)' }}
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- LAMPIRAN -->
+
+                    <div
+                        v-if="doc.lampiranList.length"
+                        class="mt-10 border-t-2 border-slate-900 pt-6 page-break"
+                    >
+
+                        <h3 class="text-center font-bold text-sm uppercase mb-4">
+
+                            LAMPIRAN-LAMPIRAN
+
+                        </h3>
+
+
+                        <div
+                            v-for="(lamp,lIdx) in doc.lampiranList"
+                            :key="'lamp'+lIdx"
+                            class="mb-6"
+                        >
+
+                            <h4 class="font-bold text-xs bg-slate-100 p-2 border border-slate-900">
+
+                                {{ lamp.title }}
+
+                            </h4>
+
+                            <div class="whitespace-pre-line text-xs font-mono bg-slate-50 p-3 border">
+
+                                {{ lamp.content }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500 no-print">
+
+        SIMOD AI — Asisten Penyusun Rencana Pembelajaran Mendalam
+
+    </footer>
+
+</div>
+
+
+<!-- =============================================================
+     VUE APPLICATION
+================================================================ -->
+
+<script>
+
+
+/* =============================================================
+   1. URL GOOGLE APPS SCRIPT
+=============================================================
+
+   GANTI BAGIAN DI BAWAH INI DENGAN URL /exec ANDA.
+
+============================================================= */
+
+const SIMOD_AI_API =
+    "https://script.google.com/macros/s/AKfycbyWPZ1mN4BHZPX_ZdJHW0JhdyLomLZ72GdUbV3NV-wtgEnkkYpIwvNSMu8TjMOtJQ3mZw/exec";
+
+
+/* =============================================================
+   2. VUE
+============================================================= */
+
+const {
+    createApp
+} = Vue;
+
+
+createApp({
+
+    /* =========================================================
+       DATA
+    ========================================================== */
+
+    data() {
+
+        return {
+
+            activeTab: 0,
+
+            aiLoading: false,
+
+            aiMessage: '',
+
+            aiMessageType: 'info',
+
+
+            tabs: [
+
+                {
+                    name: '1. Identitas & Identifikasi'
+                },
+
+                {
+                    name: '2. Desain Pembelajaran'
+                },
+
+                {
+                    name: '3. Pengalaman Belajar'
+                },
+
+                {
+                    name: '4. Asesmen & Lampiran'
+                }
+
+            ],
+
+
+            opsiDimensi: [
+
+                'Ketuhanan Yang Maha Esa',
+                'Kewargaan',
+                'Penalaran Kritis',
+                'Kolaborasi',
+                'Komunikasi',
+                'Kreativitas',
+                'Kemandirian',
+                'Kesehatan'
+
+            ],
+
+
+            doc: this.getEmptyDoc()
+
+        };
+
+    },
+
+
+    /* =========================================================
+       MOUNTED
+    ========================================================== */
+
+    mounted() {
+
+        this.refreshIcons();
+
+    },
+
+
+    updated() {
+
+        this.$nextTick(() => {
+
+            this.refreshIcons();
+
+        });
+
+    },
+
+
+    /* =========================================================
+       METHODS
+    ========================================================== */
+
+    methods: {
+
+
+        /* =====================================================
+           ICON
+        ====================================================== */
+
+        refreshIcons() {
+
+            if (window.lucide) {
+
+                window.lucide.createIcons();
+
+            }
+
+        },
+
+
+        /* =====================================================
+           EMPTY DOCUMENT
+        ====================================================== */
+
+        getEmptyDoc() {
+
+            return {
+
+                identitas: {
+
+                    mapel: '',
+                    kelas: '',
+                    jurusan: '',
+                    semester: '',
+                    jumlahPertemuan: '',
+                    namaGuru: '',
+                    nipGuru: '',
+                    supervisor: '',
+                    nipSupervisor: '',
+                    kepalaSekolah: '',
+                    nipKepala: '',
+                    kota: 'Jember',
+                    tanggal: ''
+
+                },
+
+
+                identifikasi: {
+
+                    dimensiProfil: [
+                        'Penalaran Kritis',
+                        'Kolaborasi',
+                        'Kemandirian'
+                    ],
+
+                    kesiapanMurid: '',
+
+                    karakteristikMateri: ''
+
+                },
+
+
+                desain: {
+
+                    tujuanPembelajaran: '',
+
+                    kktpList: [''],
+
+                    praktikPedagogis:
+                        'Problem Based Learning (PBL), Diskusi Kelompok',
+
+                    kemitraanPembelajaran: '',
+
+                    lingkunganFisik:
+                        'Ruang kelas',
+
+                    lingkunganVirtual:
+                        'Google Classroom / YouTube',
+
+                    budayaBelajar:
+                        'Penalaran kritis, kolaborasi, kemandirian, komunikasi',
+
+                    pemanfaatanDigital: ''
+
+                },
+
+
+                pengalamanBelajar: [
+
+                    {
+
+                        kktpRef: '',
+                        awal: '',
+                        memahami: '',
+                        mengaplikasi: '',
+                        merefleksi: '',
+                        penutup: ''
+
+                    }
+
+                ],
+
+
+                asesmen: {
+
+                    asLearning: '',
+                    forLearning: '',
+                    ofLearning: ''
+
+                },
+
+
+                lampiranList: []
+
+            };
+
+        },
+
+
+        /* =====================================================
+           MESSAGE
+        ====================================================== */
+
+        showMessage(message, type = 'info') {
+
+            this.aiMessage = message;
+
+            this.aiMessageType = type;
+
+            this.$nextTick(() => {
+
+                this.refreshIcons();
+
+            });
+
+        },
+
+
+        /* =====================================================
+           TEST CONNECTION
+        ====================================================== */
+
+        async testAIConnection() {
+
+            if (
+                !SIMOD_AI_API ||
+                SIMOD_AI_API ===
+                "MASUKKAN_URL_WEB_APP_ANDA_DI_SINI"
+            ) {
+
+                this.showMessage(
+                    'Masukkan URL Web App Google Apps Script terlebih dahulu.',
+                    'error'
+                );
+
+                return;
+
+            }
+
+
+            this.aiLoading = true;
+
+
+            try {
+
+                const response = await fetch(
+                    SIMOD_AI_API,
+                    {
+
+                        method: 'POST',
+
+                        headers: {
+
+                            'Content-Type':
+                                'text/plain;charset=utf-8'
+
+                        },
+
+                        body: JSON.stringify({
+
+                            action: 'test'
+
+                        })
+
+                    }
+                );
+
+
+                const result =
+                    await response.json();
+
+
+                if (result.success) {
+
+                    this.showMessage(
+                        'Koneksi SIMOD AI berhasil. Google Apps Script siap menerima permintaan.',
+                        'success'
+                    );
+
+                } else {
+
+                    this.showMessage(
+                        result.error ||
+                        'Koneksi gagal.',
+                        'error'
+                    );
+
+                }
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                this.showMessage(
+                    'Koneksi gagal: ' +
+                    error.message,
+                    'error'
+                );
+
+            }
+
+
+            this.aiLoading = false;
+
+        },
+
+
+        /* =====================================================
+           KIRIM REQUEST KE APPS SCRIPT
+        ====================================================== */
+
+        async callAI(prompt, action = 'generate') {
+
+            if (
+                !SIMOD_AI_API ||
+                SIMOD_AI_API ===
+                "MASUKKAN_URL_WEB_APP_ANDA_DI_SINI"
+            ) {
+
+                throw new Error(
+                    'URL Google Apps Script belum diisi.'
+                );
+
+            }
+
+
+            const response = await fetch(
+                SIMOD_AI_API,
+                {
+
+                    method: 'POST',
+
+                    headers: {
+
+                        'Content-Type':
+                            'text/plain;charset=utf-8'
+
+                    },
+
+                    body: JSON.stringify({
+
+                        action: action,
+
+                        prompt: prompt,
+
+                        document: this.doc
+
+                    })
+
+                }
+            );
+
+
+            const result =
+                await response.json();
+
+
+            if (!result.success) {
+
+                throw new Error(
+                    result.error ||
+                    'AI gagal memberikan jawaban.'
+                );
+
+            }
+
+
+            return result;
+
+        },
+
+
+        /* =====================================================
+           GENERATE RPM AI
+        ====================================================== */
+
+        async generateRPMWithAI() {
+
+            if (
+                !this.doc.identitas.mapel &&
+                !this.doc.desain.tujuanPembelajaran
+            ) {
+
+                this.showMessage(
+                    'Isi minimal Mata Pelajaran atau Tujuan Pembelajaran terlebih dahulu.',
+                    'error'
+                );
+
+                this.activeTab = 0;
+
+                return;
+
+            }
+
+
+            this.aiLoading = true;
+
+
+            this.showMessage(
+                'AI sedang membaca data dan menyusun RPM...',
+                'info'
+            );
+
+
+            try {
+
+                const prompt = this.buildFullPrompt();
+
+
+                const result =
+                    await this.callAI(
+                        prompt,
+                        'generate'
+                    );
+
+
+                /*
+                 * TAHAP 2:
+                 * Apps Script masih mengembalikan
+                 * data simulasi.
+                 *
+                 * Pada tahap berikutnya bagian ini
+                 * akan menerima JSON RPM dari AI.
+                 */
+
+
+                if (
+                    result.result &&
+                    result.result.type ===
+                    'simulation'
+                ) {
+
+                    this.showMessage(
+                        'Koneksi AI berhasil. Mesin AI akan kita aktifkan pada tahap berikutnya.',
+                        'success'
+                    );
+
+                    console.log(
+                        'DATA YANG DIKIRIM KE AI:',
+                        result.result.prompt
+                    );
+
+                } else {
+
+                    this.applyAIResult(
+                        result.result
+                    );
+
+                }
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                this.showMessage(
+                    'AI gagal memproses permintaan: ' +
+                    error.message,
+                    'error'
+                );
+
+            }
+
+
+            this.aiLoading = false;
+
+        },
+
+
+        /* =====================================================
+           PROMPT LENGKAP
+        ====================================================== */
+
+        buildFullPrompt() {
+
+            return `
+
+ANDA ADALAH ASISTEN PENYUSUN RENCANA PEMBELAJARAN MENDALAM (RPM).
+
+Susun perangkat pembelajaran yang:
+
+1. Kontekstual.
+2. Bermakna.
+3. Berkesadaran.
+4. Menggembirakan.
+5. Sesuai karakteristik peserta didik.
+6. Sesuai jenjang dan fase.
+7. Jika SMK, kaitkan dengan konsentrasi keahlian/dunia kerja.
+8. Menggunakan aktivitas memahami, mengaplikasi, dan merefleksi.
+9. Memuat asesmen diagnostik, formatif, dan sumatif.
+10. Menghasilkan kegiatan pembelajaran yang realistis dilakukan guru.
+
+DATA IDENTITAS:
+
+Mata Pelajaran:
+${this.doc.identitas.mapel}
+
+Kelas/Fase:
+${this.doc.identitas.kelas}
+
+Jurusan/Konsentrasi:
+${this.doc.identitas.jurusan}
+
+Semester:
+${this.doc.identitas.semester}
+
+Alokasi:
+${this.doc.identitas.jumlahPertemuan}
+
+Guru:
+${this.doc.identitas.namaGuru}
+
+
+IDENTIFIKASI PEMBELAJARAN:
+
+Dimensi Profil Lulusan:
+${this.doc.identifikasi.dimensiProfil.join(', ')}
+
+Kesiapan Murid:
+${this.doc.identifikasi.kesiapanMurid}
+
+Karakteristik Materi:
+${this.doc.identifikasi.karakteristikMateri}
+
+
+DESAIN PEMBELAJARAN:
+
+Tujuan Pembelajaran:
+${this.doc.desain.tujuanPembelajaran}
+
+KKTP:
+${this.doc.desain.kktpList.join('\n')}
+
+Praktik Pedagogis:
+${this.doc.desain.praktikPedagogis}
+
+Kemitraan:
+${this.doc.desain.kemitraanPembelajaran}
+
+Lingkungan Fisik:
+${this.doc.desain.lingkunganFisik}
+
+Lingkungan Virtual:
+${this.doc.desain.lingkunganVirtual}
+
+Budaya Belajar:
+${this.doc.desain.budayaBelajar}
+
+Pemanfaatan Digital:
+${this.doc.desain.pemanfaatanDigital}
+
+
+TUGAS:
+
+Buat rancangan RPM yang lengkap.
+
+Pastikan setiap pertemuan memiliki:
+
+- Fokus KKTP
+- Kegiatan awal
+- Memahami
+- Mengaplikasi
+- Merefleksi
+- Kegiatan penutup
+
+Buat asesmen:
+
+- Asesmen awal
+- Asesmen formatif
+- Asesmen sumatif
+
+Buat juga:
+
+- LKPD
+- Rubrik
+- Refleksi murid
+
+HASIL HARUS KONSISTEN DENGAN TUJUAN PEMBELAJARAN DAN KKTP.
+
+`;
+
+        },
+
+
+        /* =====================================================
+           APPLY RESULT
+        ====================================================== */
+
+        applyAIResult(result) {
+
+            if (!result) {
+
+                return;
+
+            }
+
+
+            /*
+             * Fungsi ini sengaja disiapkan untuk tahap berikutnya.
+             *
+             * Pada tahap berikutnya AI akan mengembalikan
+             * JSON terstruktur.
+             */
+
+            console.log(
+                'HASIL AI:',
+                result
+            );
+
+        },
+
+
+        /* =====================================================
+           AI UNTUK TP
+        ====================================================== */
+
+        async askAIForTP() {
+
+            this.aiLoading = true;
+
+
+            try {
+
+                const prompt = `
+
+Buatkan Tujuan Pembelajaran (TP) untuk:
+
+Mata Pelajaran:
+${this.doc.identitas.mapel}
+
+Kelas/Fase:
+${this.doc.identitas.kelas}
+
+Jurusan:
+${this.doc.identitas.jurusan}
+
+Materi:
+${this.doc.identifikasi.karakteristikMateri}
+
+Gunakan rumusan TP yang jelas, terukur, kontekstual,
+dan sesuai karakteristik peserta didik.
+
+`;
+
+                const result =
+                    await this.callAI(
+                        prompt,
+                        'generate'
+                    );
+
+
+                if (
+                    result.result &&
+                    result.result.type ===
+                    'simulation'
+                ) {
+
+                    this.showMessage(
+                        'Permintaan TP berhasil dikirim. Mesin AI akan diaktifkan pada tahap berikutnya.',
+                        'success'
+                    );
+
+                }
+
+
+            } catch (error) {
+
+                this.showMessage(
+                    error.message,
+                    'error'
+                );
+
+            }
+
+
+            this.aiLoading = false;
+
+        },
+
+
+        /* =====================================================
+           AI UNTUK PERTEMUAN
+        ====================================================== */
+
+        async improveMeetingWithAI(index) {
+
+            const p =
+                this.doc.pengalamanBelajar[index];
+
+
+            this.aiLoading = true;
+
+
+            try {
+
+                const prompt = `
+
+Perbaiki rancangan pembelajaran berikut.
+
+Mata Pelajaran:
+${this.doc.identitas.mapel}
+
+Kelas:
+${this.doc.identitas.kelas}
+
+Jurusan:
+${this.doc.identitas.jurusan}
+
+Tujuan Pembelajaran:
+${this.doc.desain.tujuanPembelajaran}
+
+KKTP:
+${p.kktpRef}
+
+Kegiatan Awal:
+${p.awal}
+
+Memahami:
+${p.memahami}
+
+Mengaplikasi:
+${p.mengaplikasi}
+
+Merefleksi:
+${p.merefleksi}
+
+Penutup:
+${p.penutup}
+
+Buat kegiatan yang lebih kontekstual,
+bermakna, berkesadaran dan menggembirakan.
+
+`;
+
+                const result =
+                    await this.callAI(
+                        prompt,
+                        'generate'
+                    );
+
+
+                if (
+                    result.result &&
+                    result.result.type ===
+                    'simulation'
+                ) {
+
+                    this.showMessage(
+                        'Permintaan perbaikan Pertemuan ' +
+                        (index + 1) +
+                        ' berhasil dikirim.',
+                        'success'
+                    );
+
+                }
+
+
+            } catch (error) {
+
+                this.showMessage(
+                    error.message,
+                    'error'
+                );
+
+            }
+
+
+            this.aiLoading = false;
+
+        },
+
+
+        /* =====================================================
+           KKTP
+        ====================================================== */
+
+        addKKTP() {
+
+            this.doc.desain.kktpList.push('');
+
+        },
+
+
+        removeKKTP(index) {
+
+            if (
+                this.doc.desain.kktpList.length > 1
+            ) {
+
+                this.doc.desain.kktpList.splice(
+                    index,
+                    1
+                );
+
+            }
+
+        },
+
+
+        /* =====================================================
+           PERTEMUAN
+        ====================================================== */
+
+        addPertemuan() {
+
+            this.doc.pengalamanBelajar.push({
+
+                kktpRef: '',
+                awal: '',
+                memahami: '',
+                mengaplikasi: '',
+                merefleksi: '',
+                penutup: ''
+
+            });
+
+        },
+
+
+        removePertemuan(index) {
+
+            this.doc.pengalamanBelajar.splice(
+                index,
+                1
+            );
+
+        },
+
+
+        /* =====================================================
+           LAMPIRAN
+        ====================================================== */
+
+        addLampiran() {
+
+            this.doc.lampiranList.push({
+
+                title:
+                    'LAMPIRAN ' +
+                    (this.doc.lampiranList.length + 1),
+
+                content: ''
+
+            });
+
+        },
+
+
+        removeLampiran(index) {
+
+            this.doc.lampiranList.splice(
+                index,
+                1
+            );
+
+        },
+
+
+        /* =====================================================
+           RESET
+        ====================================================== */
+
+        resetForm() {
+
+            if (
+                confirm(
+                    'Apakah Anda yakin ingin mengosongkan form?'
+                )
+            ) {
+
+                this.doc =
+                    this.getEmptyDoc();
+
+                this.showMessage(
+                    'Form telah dikosongkan.',
+                    'success'
+                );
+
+            }
+
+        },
+
+
+        /* =====================================================
+           SAMPLE
+        ====================================================== */
+
+        loadSampleData() {
+
+            this.doc = {
+
+                identitas: {
+
+                    mapel: 'Matematika',
+
+                    kelas: 'X / Fase E',
+
+                    jurusan:
+                        'Agribisnis Tanaman',
+
+                    semester: 'Ganjil',
+
+                    jumlahPertemuan:
+                        '4 Pertemuan (8 JP)',
+
+                    namaGuru:
+                        'Guru Matematika',
+
+                    nipGuru: '',
+
+                    supervisor:
+                        'Supervisor / Wakasek Kurikulum',
+
+                    nipSupervisor: '',
+
+                    kepalaSekolah:
+                        'Kepala Sekolah',
+
+                    nipKepala: '',
+
+                    kota: 'Jember',
+
+                    tanggal: ''
+
+                },
+
+
+                identifikasi: {
+
+                    dimensiProfil: [
+
+                        'Penalaran Kritis',
+                        'Kolaborasi',
+                        'Kreativitas',
+                        'Kemandirian'
+
+                    ],
+
+                    kesiapanMurid:
+                        'Murid telah memahami operasi hitung dasar dan konsep perbandingan sederhana.',
+
+                    karakteristikMateri:
+                        'Materi perbandingan dan trigonometri dapat dikaitkan dengan pengukuran tinggi tanaman, kemiringan lahan, jarak, dan kebutuhan teknis di bidang pertanian.'
+
+                },
+
+
+                desain: {
+
+                    tujuanPembelajaran:
+                        'Murid mampu menerapkan konsep perbandingan trigonometri untuk menyelesaikan masalah pengukuran yang berkaitan dengan konteks pertanian.',
+
+                    kktpList: [
+
+                        'Murid mampu mengidentifikasi informasi yang diketahui dan ditanyakan dari masalah kontekstual.',
+
+                        'Murid mampu menentukan perbandingan trigonometri yang sesuai.',
+
+                        'Murid mampu melakukan perhitungan dengan tepat.',
+
+                        'Murid mampu menjelaskan hasil perhitungan sesuai konteks masalah.',
+
+                        'Murid mampu merefleksikan proses dan hasil penyelesaian masalah.'
+
+                    ],
+
+                    praktikPedagogis:
+                        'Problem Based Learning (PBL), diskusi kelompok, praktik pengukuran',
+
+                    kemitraanPembelajaran:
+                        'Guru produktif dan lingkungan sekitar sekolah',
+
+                    lingkunganFisik:
+                        'Ruang kelas dan lahan praktik',
+
+                    lingkunganVirtual:
+                        'Google Classroom dan video pembelajaran',
+
+                    budayaBelajar:
+                        'Kolaborasi, komunikasi, penalaran kritis, kemandirian',
+
+                    pemanfaatanDigital:
+                        'Kalkulator, video, LKPD digital'
+
+                },
+
+
+                pengalamanBelajar: [
+
+                    {
+
+                        kktpRef:
+                            'Mengidentifikasi informasi dan menentukan model masalah.',
+
+                        awal:
+                            'Guru membuka pembelajaran dengan salam, doa, presensi, apersepsi, dan pertanyaan pemantik tentang cara mengukur tinggi pohon tanpa memanjat.',
+
+                        memahami:
+                            'Murid mengamati gambar atau video pengukuran objek dan mengidentifikasi hubungan sisi segitiga dengan sudut.',
+
+                        mengaplikasi:
+                            'Murid bekerja dalam kelompok menyelesaikan LKPD tentang pengukuran tinggi objek menggunakan perbandingan trigonometri.',
+
+                        merefleksi:
+                            'Kelompok mempresentasikan strategi penyelesaian dan kelompok lain memberikan tanggapan.',
+
+                        penutup:
+                            'Murid bersama guru menyimpulkan konsep dan melakukan refleksi singkat.'
+
+                    }
+
+                ],
+
+
+                asesmen: {
+
+                    asLearning:
+                        'Kuis diagnostik tentang perbandingan dan segitiga siku-siku.',
+
+                    forLearning:
+                        'Observasi diskusi, LKPD, pertanyaan lisan, dan umpan balik selama proses.',
+
+                    ofLearning:
+                        'Tes tertulis dan penilaian proyek pengukuran kontekstual.'
+
+                },
+
+
+                lampiranList: [
+
+                    {
+
+                        title:
+                            'LAMPIRAN 1: ASESMEN DIAGNOSTIK',
+
+                        content:
+                            '1. Jelaskan pengertian perbandingan.\n2. Tentukan sisi miring segitiga siku-siku.\n3. Berikan contoh penggunaan segitiga dalam kehidupan sehari-hari.'
+
+                    },
+
+                    {
+
+                        title:
+                            'LAMPIRAN 2: LKPD',
+
+                        content:
+                            'Judul: Mengukur Tinggi Objek di Lingkungan Sekolah\n\nTujuan: Menggunakan perbandingan trigonometri untuk menentukan tinggi objek.\n\nLangkah:\n1. Pilih objek.\n2. Ukur jarak pengamat dengan objek.\n3. Tentukan sudut elevasi.\n4. Hitung tinggi objek.\n5. Buat kesimpulan.'
+
+                    }
+
+                ]
+
+            };
+
+
+            this.showMessage(
+                'Contoh RPM berhasil dimuat.',
+                'success'
+            );
+
+        },
+
+
+        /* =====================================================
+           PRINT
+        ====================================================== */
+
+        printDocument() {
+
+            window.print();
+
+        },
+
+
+        /* =====================================================
+           WORD
+        ====================================================== */
+
+        exportToWord() {
+
+            const content =
+                document.getElementById(
+                    'document-paper'
+                ).innerHTML;
+
+
+            const header =
+                "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+                "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+                "xmlns='http://www.w3.org/TR/REC-html40'>" +
+
+                "<head>" +
+
+                "<meta charset='utf-8'>" +
+
+                "<title>RPM Pembelajaran Mendalam</title>" +
+
+                "<style>" +
+
+                "body{" +
+                "font-family:'Times New Roman',serif;" +
+                "font-size:11pt;" +
+                "}" +
+
+                "table{" +
+                "border-collapse:collapse;" +
+                "width:100%;" +
+                "}" +
+
+                "td,th{" +
+                "border:1px solid #000;" +
+                "padding:5px;" +
+                "}" +
+
+                "</style>" +
+
+                "</head>" +
+
+                "<body>";
+
+
+            const footer =
+                "</body></html>";
+
+
+            const sourceHTML =
+                header +
+                content +
+                footer;
+
+
+            const source =
+                'data:application/vnd.ms-word;charset=utf-8,' +
+                encodeURIComponent(
+                    sourceHTML
+                );
+
+
+            const fileDownload =
+                document.createElement('a');
+
+
+            document.body.appendChild(
+                fileDownload
+            );
+
+
+            fileDownload.href =
+                source;
+
+
+            fileDownload.download =
+                `RPM_${this.doc.identitas.mapel || 'Modul'}_${this.doc.identitas.kelas || 'Kelas'}.doc`;
+
+
+            fileDownload.click();
+
+
+            document.body.removeChild(
+                fileDownload
+            );
+
+        }
+
+    }
+
+}).mount('#app');
+
+</script>
+
+</body>
+</html>
+```
